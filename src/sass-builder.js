@@ -9,7 +9,10 @@ import sass from 'sass.js';
 import CssUrlRewriter from 'css-url-rewriter-ex';
 import CssAssetCopier from 'css-asset-copier';
 
+import convertSassToScss from './sass-to-scss';
+
 import resolvePath from './resolve-path';
+import resolvePathSass from './resolve-path-sass';
 
 function injectStyle(css) {
   const style = document.createElement('style');
@@ -73,10 +76,28 @@ sass.importer(async (request, done) => {
     try {
       content = await loadFile(readImportPath);
     } catch (er) {
-      done();
-      return;
+      try {
+        resolved = await resolvePathSass(request);
+        const partialUrl = resolved.replace(/\/([^/]*)$/, '/_$1');
+        readImportPath = fromFileURL(resolved);
+        readPartialPath = fromFileURL(partialUrl);
+        content = await loadFile(readPartialPath);
+      } catch (e) {
+        try {
+          content = await loadFile(readImportPath);
+        } catch (er) {
+          done();
+          return;
+        }
+      }
     }
   }
+
+  if( /.*\.sass$/g.test(resolved) ) {
+    content = convertSassToScss(content);
+    resolved = resolved.replace(/(.*).sass/g, '$1.scss');
+  }
+
   done({ content, path: resolved });
 });
 
