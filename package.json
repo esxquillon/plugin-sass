@@ -45,6 +45,7 @@
     "eslint-plugin-mocha": "^4.7.0",
     "jspm": "^0.16.34",
     "mocha": "^2.4.5",
+    "prelude-ls": "^1.1.2",
     "pug-cli": "^1.0.0-alpha1",
     "rimraf": "^2.5.2",
     "systemjs": "^0.19.27"
@@ -72,5 +73,6 @@
       "bootstrap": "github:twbs/bootstrap-sass@^3.3.6",
       "core-js": "npm:core-js@^1.1.4"
     }
-  }
+  },
+  "dependencies": {}
 }
