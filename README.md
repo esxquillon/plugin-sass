@@ -9,7 +9,7 @@
 [jspm](http://jspm.io) package manager.
 
 ```sh
-$ jspm install sass --dev
+$ jspm install sass=github:esxquillon/plugin-sass --dev
 ```
 
 Recommended plugin usage configuration is:
