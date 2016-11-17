@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import p from 'prelude-ls';
+import p from 'prelude-ls/lib/index';
 
 var mixin_alias_regex = /(^\s*)=(\s*)/;
 var include_alias_regex = /(^\s*)\+(\s*)/;
