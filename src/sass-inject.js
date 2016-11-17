@@ -10,7 +10,12 @@ import url from 'url';
 
 import CssUrlRewriter from 'css-url-rewriter-ex';
 
+import convertSassToScss from './sass-to-scss'
+
 import resolvePath from './resolve-path';
+import resolvePathSass from './resolve-path-sass';
+
+var global_option = {};
 
 function injectStyle(css, address) {
   if (address) {
@@ -64,10 +69,33 @@ async function sassImporter(request, done) {
       const resp = await reqwest(resolved);
       content = resp.responseText ? resp.responseText : resp;
     } catch (er) {
-      done();
-      return;
+      try {
+        resolved = await resolvePathSass(request);
+        const partialPath = resolved.replace(/\/([^/]*)$/, '/_$1');
+        const resp = await reqwest(partialPath);
+        // In Cordova Apps the response is the raw XMLHttpRequest
+        content = resp.responseText ? resp.responseText : resp;
+      } catch(e) {
+        try {
+          const resp = await reqwest(resolved);
+          content = resp.responseText ? resp.responseText : resp;
+        } catch (er) {
+          done();
+          return;
+        }
+      }
     }
   }
+  
+  if( /.*\.sass$/g.test(resolved) ) {
+    if(typeof content !== 'object') {
+      content = convertSassToScss(content);
+      resolved = resolved.replace(/(.*).sass/g, '$1.scss');
+    } else {
+      content = "";
+    }
+  }
+  
   done({ content, path: resolved });
 }
 
@@ -80,6 +108,9 @@ async function compile(scss, styleUrl) {
   // compile module
   const content = scss.content;
   const responseText = content.responseText;
+
+  global_option = scss.options;
+
   if (isString(content) && isEmpty(content) ||
       !isUndefined(responseText) && isEmpty(responseText)) {
     return '';
@@ -138,3 +169,8 @@ export default async function sassInject(load) {
   };
   return compile(scss, load.address);
 }
+
+
+
+
+
